@@ -1,0 +1,170 @@
+---
+title: 'Lesson 3: Filters and Plots'
+output: html_document
+---
+
+## Background for this activity
+In this activity, you’ll review a scenario, and practice creating a data visualization with ggplot2. You will learn how to make use of the filters and facets features of ggplot2 to create custom visualizations based on different criteria. 
+
+Throughout this activity, you will also have the opportunity to practice writing your own code by making changes to the code chunks yourself. If you encounter an error or get stuck, you can always check the Lesson3_Filters_Solutions .rmd file in the Solutions folder under Week 4 for the complete, correct code. 
+
+## The Scenario
+
+As a junior data analyst for a hotel booking company, you have been asked to clean hotel booking data, create visualizations with `ggplot2` to gain insight into the data, and present different facets of the data through visualization. Now, you are going to build on the work you performed previously to apply filters to your data visualizations in `ggplot2`.  
+
+## Step 1: Import your data
+
+If you haven't exited out of RStudio since importing this data last time, you can skip these steps. Rerunning these code chunks won't affect your console if you want to run them just in case, though.  
+
+Run the code below to read in the file 'hotel_bookings.csv' into a data frame: 
+
+```{r load data}
+hotel_bookings <- read.csv("hotel_bookings.csv")
+```
+
+## Step 2: Refresh Your Memory
+
+By now, you are pretty familiar with this data set. But you can refresh your memory with the `head()` and `colnames()` functions. Run two code chunks below to get at a sample of the data and also preview all the column names:
+
+```{r look at data}
+head(hotel_bookings)
+```
+
+```{r look at column names}
+colnames(hotel_bookings)
+```
+
+## Step 3: Install and load the 'ggplot2' package (optional)
+
+If you haven't already installed and loaded the `ggplot2` package, you will need to do that before you can use the `ggplot()` function. You only have to do this once though, not every time you call `ggplot()`.
+
+You can also skip this step if you haven't closed your RStudio account since doing the last activity. If you aren't sure, you can run the code chunk and hit 'cancel' if the warning message pops up telling you that have already downloaded the `ggplot2` package.
+
+Run the code chunk below to install and load `ggplot2`. This may take a few minutes!
+
+```{r loading and installing ggplot2, echo=FALSE, message=FALSE}
+install.packages('ggplot2')
+library(ggplot2)
+```
+
+## Step 4: Making many different charts
+
+Earlier, you created a scatter plot to explore the relationship between booking lead time and guests traveling with children. Your stakeholder is interested in a similar chart that investigates this relationship in different cities.  
+
+As a refresher, here's the scatter plot you created earlier:
+```{r creating a plot}
+ggplot(data = hotel_bookings) +
+  geom_point(mapping = aes(x = lead_time, y = children))
+```
+This creates a data visualization with 'lead_time' on the x axis and 'children' on the y axis to measure the relationship between these two variables. 
+
+Now, you can add color to differentiate the hotel types. Add `color=hotel` after 'y = children' in the `aes()` argument in the code chunk below and run it:
+
+```{r color by type}
+ggplot(data = hotel_bookings) +
+  geom_point(mapping = aes(x = lead_time, y = children, ))
+```
+
+This creates a similar plot to the one you created earlier, but the added color makes the data points easier to tell apart and identify trends, such as the fact that the majority of early booking was related to city hotels. 
+
+Your stakeholder mentions that they are having trouble reading this chart. They ask if you can create a box plot with just the total and city data. You can create this by running the code chunk below: 
+
+```{r boxplot with city and total}
+ggplot(data = hotel_bookings, aes(x=hotel, y=lead_time)) +
+  geom_boxplot()
+```
+
+This creates a box plot that generates another view of the 'city_hotel' and 'resort_hotel' data. 
+
+After viewing this chart, you and your stakeholder observe that resort hotels have slightly shorter booking lead time than other hotel types. After realizing this, your stakeholder is interested in exploring the relationship between market segments and hotel types. 
+
+You decide to try a bar chart with different colors representing the hotel type; each bar will represent a market segment: 
+
+```{r city bar chart}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = hotel, fill=market_segment))
+```
+
+Now you have a bar chart with 'hotel' on the x axis and 'count' on the y axis. It also includes 'market_segment' data as color-coded sections of the bars. 
+
+After creating this bar chart, you realize that this makes the metrics harder to compare. To address this, you can use 'facet_wrap()' again and input 'hotel' after the '~' symbol: 
+
+```{r faceting a plot}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = market_segment)) +
+  facet_wrap(~)
+```
+Now you have two bar charts, one for each hotel type, measuring 'market_segment' and 'count.' These labels might be hard to read though-- you can continue to adjust this code chunk to try and generate a more readable visualization.  
+
+## Step 5: Filtering
+
+Your stakeholder asks if you can create a chart that explores the relationship between lead time and guests traveling with children for specifically city hotels using online TA. They also ask for the distribution channel split for the same thing. 
+
+You think about it, and realize you have all the tools you need, so you break it down into the following two steps:
+
+Step 1 is creating a data set that just includes the data you want using the `filter()` function. Input 'City Hotel' and 'Online TA' in the quotations marks to specify your criteria: 
+
+```{r filtering a dataset to just city hotels that are online TA}
+onlineta_city_hotels <- filter(hotel_bookings, 
+                           (hotel_bookings$hotel=="" & 
+                             hotel_bookings$market_segment==""))
+```
+
+Note that you can use the & character to demonstrate that you want two different conditions to be true. Also, you can specify which column in the data frame 'hotel_bookings' you are referencing by using the '$' character after the name of the data frame. In this case, that is 'hotel' and 'market_segment' columns. 
+
+You can get the new data frame you created using the`view` function and the name of the new data frame, which is `onlineta_city_hotesl`:
+
+```{r View}
+View(onlineta_city_hotels)
+```
+
+There is also another way to do this. You could use the pipe operator (%>%) to do this in steps! For that, you will need to have the `tidyverse` package installed and loaded. You may see a pop-up asking if you want to install; if that's the case, click 'Install.' This may take a few minutes!
+
+If you already have done this because you're using the `tidyverse` package on your own, you can skip this code chunk.
+
+```{r install and download tidyverse}
+install.packages('tidyverse')
+library(tidyverse)
+```
+
+Now that you have done that, check out how you can create the same exact data set. You will name it with `_v2` at the end:
+
+```{r filtering a dataset to just Ewallet transactions in Yangon}
+onlineta_city_hotels_v2 <- hotel_bookings %>%
+  filter(hotel=="City Hotel") %>%
+  filter(market_segment=="Online TA")
+```
+
+Notice how in the code chunk above, the %>% symbol is used to note the logical steps of this code. First, it starts with the name of the data frame, `onlineta_city_hotels_v2`, AND THEN it tells `R` to start with the original data frame `hotel_bookings`. Then it tells it to filter on the hotel column; finally, it tells it to filter on the `market_segment column`.
+
+This code chunk generates the same data frame by using the `view()` function:
+
+```{r view second dataframe}
+View(onlineta_city_hotels_v2)
+```
+
+## Step 6: Use your new dataframe
+
+You can use either of the data frames you created above for your new plots because they are the same. 
+
+Using the code from earlier, replace `variable_name` in the code chunk below with either `onlineta_city_hotels` or `onlineta_city_hotels_v2` to get the same chart for the specific set your stakeholder cares about:
+
+```{r creating a plot part two}
+ggplot(data = variable_name) +
+  geom_point(mapping = aes(x = lead_time, y = children))
+```
+
+And now, to split by gender: 
+- Replace 'variable_name' with the name of your filtered data set
+- Replace 'variable_name2' with 'distribution_channel'
+
+```{r faceting a plot}
+ggplot(data = variable_name) +
+  geom_point(mapping = aes(x = lead_time, y = children, color=variable_name2))
+```
+
+Your stakeholder is really pleased by how you were able to present all of these different cuts of data. 
+
+## Activity Wrap Up
+
+Filters allow you to create different views of your data and allow you to investigate more specific relationships within your data. You can practice these skills by modifying the code chunks in the rmd file, or use this code as a starting point in your own project console. Now that your stakeholder has had a chance to review these charts, they are interested in adding annotations they can use to explain the data in a presentation. Luckily, `ggplot2` has a function that will allow you to do just that. You will learn more about `ggplot2` in the next activity! 
